@@ -64,7 +64,22 @@ import time
 import requests
 from typing import Dict, Any, Optional, List, Tuple, Union
 from pathlib import Path
-from agent.auxiliary_client import call_llm
+
+# ``agent.auxiliary_client`` drags in credential_pool → hermes_cli.auth →
+# httpx → rich (~50 ms cold) and is only needed when a vision-analysis
+# handler actually runs. Resolve it lazily; ``call_llm`` stays a module
+# attribute so tests can keep patching ``tools.browser_tool.call_llm``.
+# Truthy-skip contract: if a test already injected a mock, keep it.
+call_llm: Any = None
+
+
+def _load_auxiliary_client() -> None:
+    global call_llm
+    if call_llm is None:
+        from agent.auxiliary_client import call_llm as _call_llm
+        call_llm = _call_llm
+
+
 from agent.redact import redact_cdp_url
 from hermes_constants import (
     agent_browser_runnable,
@@ -2770,6 +2785,7 @@ def _extract_relevant_content(
         model = _get_extraction_model()
         if model:
             call_kwargs["model"] = model
+        _load_auxiliary_client()
         response = call_llm(**call_kwargs)
         extracted = (response.choices[0].message.content or "").strip()
         if not extracted:
@@ -4331,6 +4347,7 @@ def browser_vision(question: str, annotate: bool = False, task_id: Optional[str]
         }
         if vision_model:
             call_kwargs["model"] = vision_model
+        _load_auxiliary_client()
         # Try full-size screenshot; on size-related rejection, downscale and retry.
         try:
             response = call_llm(**call_kwargs)
