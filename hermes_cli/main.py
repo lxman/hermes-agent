@@ -428,7 +428,6 @@ from pathlib import Path
 from typing import Optional
 
 
-from hermes_cli.subcommands._shared import add_accept_hooks_flag as _add_accept_hooks_flag
 from hermes_cli.subcommands.cron import build_cron_parser
 from hermes_cli.subcommands.gateway import build_gateway_parser
 from hermes_cli.subcommands.profile import build_profile_parser
@@ -11042,10 +11041,8 @@ def _cmd_update_check(branch: str = "main", *, branch_explicit: bool = False):
                 capture_output=True,
                 text=True, encoding="utf-8", errors="replace",
             )
-            upstream_exists = False
             compare_branch = f"origin/{branch}"
         else:
-            upstream_exists = True
             compare_branch = f"upstream/{branch}"
     else:
         # Non-default branch: compare against origin/<branch> directly.
@@ -11056,7 +11053,6 @@ def _cmd_update_check(branch: str = "main", *, branch_explicit: bool = False):
             capture_output=True,
             text=True, encoding="utf-8", errors="replace",
         )
-        upstream_exists = False
         compare_branch = f"origin/{branch}"
 
     if fetch_result.returncode != 0:

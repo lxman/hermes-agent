@@ -11409,7 +11409,6 @@ def _codex_full_login_worker(session_id: str) -> None:
         from hermes_cli.auth import (
             CODEX_OAUTH_CLIENT_ID,
             CODEX_OAUTH_TOKEN_URL,
-            DEFAULT_CODEX_BASE_URL,
         )
         issuer = "https://auth.openai.com"
 
@@ -13661,7 +13660,7 @@ async def install_mcp_catalog_entry(body: MCPCatalogInstall, profile: Optional[s
         # the first clone is still running.
         action = _mcp_install_action_name(name)
         try:
-            proc = _spawn_hermes_action(
+            _spawn_hermes_action(
                 _profile_cli_args(effective_profile) + ["mcp", "install", name],
                 action,
             )

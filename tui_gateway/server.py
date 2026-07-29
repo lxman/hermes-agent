@@ -1893,7 +1893,6 @@ def _start_agent_build(sid: str, session: dict) -> None:
             ready.set()
             return
 
-        worker = None
         notify_registered = False
         home_token = None
         secret_token = None
