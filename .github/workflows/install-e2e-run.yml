@@ -94,21 +94,6 @@ jobs:
           # copy into a fresh fake-main commit on every invocation, moving the
           # update target mid-run.
           HERMES_E2E_LOG_DIR: ${{ runner.temp }}/e2e-logs
-          # Both the sandbox and the E2E's flag probe fetch the starting release
-          # from upstream over HTTPS. Anonymous git requests are rate-limited by
-          # source IP, and a matrix leg is one of several fetching at once from
-          # the shared Actions egress -- so legs intermittently die on:
-          #
-          #   remote: This request was rate-limited due to too many requests.
-          #   fatal: ... The requested URL returned error: 429
-          #   error: could not resolve upstream ref: v2026.7.20
-          #
-          # Authenticating moves the fetch onto this run's own quota. No extra
-          # permission is needed: upstream is public, so the token buys rate
-          # limit rather than access, and `contents: read` above already covers
-          # it. The credential cannot reach the installed tree either -- stage2
-          # enters the sandbox with --clearenv and an explicit allowlist.
-          HERMES_DEV_SANDBOX_UPSTREAM: https://x-access-token:${{ github.token }}@github.com/NousResearch/hermes-agent.git
 
       # Artifact names cannot contain '/', and install-ref may be a full ref
       # like refs/heads/main. GitHub Actions expressions have no string-replace
